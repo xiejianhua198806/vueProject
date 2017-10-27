@@ -1,10 +1,16 @@
 <template>
-	<city-header :cityInfo="cityInfo" @isSarching="isSarching" @isAbroad="isAbroad"></city-header>
+	<div>
+		<city-header :cityInfo="cityInfo" @isSarching="isSarching" @isAbroad="isAbroad"></city-header>
+		<div v-show="isShow">
+				<city-hot :cityHot="cityHot"></city-hot>
+				<!--<city-list :cityInfo="cityInfo"></city-list>
+				<city-aside :cityInfo="cityInfo" @scrollTop="cityScrollTop" :windowScrollTop="windowScrollTop"></city-aside>-->
+		</div>
+	</div>
 </template>
-
 <script>
-	import cityheader from './cityheader'
-
+	import cityheader from "./cityheader"
+	import cityhot from "./cityhot"
 	export default {
 		created: function() {
 			this.$http.get("/static/city.json").then(response => {
@@ -27,38 +33,49 @@
 				domesticCity: [],
 				overseasCity: [],
 				cityInfo: [],
-				//				windowScrollTop:"",
+				windowScrollTop: "",
 				isShow: true,
 				cityHot: []
 			}
 		},
 		components: {
-			"city-header": cityheader
-},
-methods: {
-		isAbroad: function(value) {
-				if(value) {//国内
+			"city-header": cityheader,
+			"city-hot": cityhot
+		},
+		methods: {
+			isAbroad: function(value) {
+				if(value) {
 					this.cityInfo = this.domesticCity;
 					this.cityHot = [];
 					for(var i = 0; i < 17; i++) {
 						this.cityHot.push(this.cityInfo[i])
-					};
-				} else { //国外
+					}
+				} else {
 					this.cityInfo = this.overseasCity;
 					this.cityHot = [];
 					for(var i = 0; i < 17; i++) {
 						this.cityHot.push(this.cityInfo[i])
-					};
-				};
+					}
+				}
+
 			},
-			isSarching: function(isShow) { //点击是否展示
+			cityScrollTop: function(value) {
+				document.body.scrollTop = value;
+			},
+			isSarching: function(isShow) {
 				if(isShow) {
 					this.isShow = true;
 				} else {
 					this.isShow = false;
 				}
-			},
-
+			}
+		},
+		mounted() {
+			window.addEventListener('scroll', function() { //想提高性能，可以加一个定时器
+				setTimeout(function() {
+					this.windowScrollTop = document.body.scrollTop;
+				}, 1)
+			}.bind(this), false)
 		}
 	}
 </script>
